@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /ffmpeg.sh
