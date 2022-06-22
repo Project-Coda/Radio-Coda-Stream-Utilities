@@ -1,7 +1,7 @@
 version: '2'
 services:
   stream:
-    image: Project-Coda/radio-coda-stream:latest
+    image: Project-Coda/radio-coda-stream-utilities:latest
     ports:
       - "5000:5000"
     volumes:
