@@ -36,6 +36,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxcb-shm0-dev \
     libxcb-xfixes0-dev \
     meson \
+    libspeex-dev \
+    speex \
     ninja-build \
     pkg-config \
     texinfo \
