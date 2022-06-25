@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libva-dev \
     libvdpau-dev \
     srt-tools \
+    libsrt-dev \
     libvorbis-dev \
     libxcb1-dev \
     libxcb-shm0-dev \
