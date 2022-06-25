@@ -1,4 +1,3 @@
-version: '2'
 services:
   stream:
     restart: always
@@ -9,3 +8,10 @@ services:
       - ./data:/data
     env_file:
       - ./.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
