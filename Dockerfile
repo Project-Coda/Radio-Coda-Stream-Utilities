@@ -42,6 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g-dev \
     libx264-dev \
     libgme-dev \
+    libsoxr-dev \
     frei0r-plugins-dev \
     librubberband-dev \
     nvidia-cuda-toolkit
