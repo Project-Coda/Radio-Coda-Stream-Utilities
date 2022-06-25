@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libass-dev \
     libopenjp2-7 \
     libopenjp2-7-dev \
+    libopus-dev \
     libfreetype6-dev \
     libgnutls28-dev \
     libmp3lame-dev \
