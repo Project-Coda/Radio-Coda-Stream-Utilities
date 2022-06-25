@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g-dev \
     libx264-dev \
     frei0r-plugins-dev \
-    nvidia-cuda-toolkit \
+    nvidia-cuda-toolkit
 
 
 RUN pip3 install flask
