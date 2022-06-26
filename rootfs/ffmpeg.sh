@@ -9,6 +9,6 @@ ldconfig && ffmpeg \
         box=0: boxcolor=black@0.5: boxborderw=20: \
         textfile=$NP_SOURCE: reload=1: fontcolor=white@0.8: x=50: y=th" \
     -filter:v fps=$FPS \
-    -c:v h264_nvenc \
+    -c:v h264_nvenc -g $(($FPS * 2)) \
     -b:v $VBR \
     -f flv "$YOUTUBE_URL/$KEY"
