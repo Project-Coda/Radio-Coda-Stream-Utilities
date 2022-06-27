@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.1.1-base-ubuntu20.04
+FROM nvidia/cuda:11.7.0-base-ubuntu20.04
 ARG S6_OVERLAY_VERSION=3.1.1.0
 COPY rootfs /
 ENV DEBIAN_FRONTEND=noninteractive
