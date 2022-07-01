@@ -3,6 +3,7 @@
 # Sample Python code for youtube.liveChatMessages.insert
 # See instructions for running these code samples locally:
 # https://developers.google.com/explorer-help/code-samples#python
+# The following code was adapted from the YouTube API v3 documentation
 
 import os
 
@@ -19,6 +20,8 @@ api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = os.environ["CLIENT_SECRETS_FILE"]
 tokenfile = os.environ["TOKEN_FILE"]
+placholder_link = os.environ["PLACEHOLDER_LINK"]
+
 
 # Get credentials and create an API client
 
@@ -35,7 +38,7 @@ if not credentials or not credentials.valid:
     else:
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
             client_secrets_file, scopes)
-        credentials = flow.run_local_server(port=0)
+        credentials = flow.run_local_server(port=5410)
     # Save the credentials for the next run
     with open(tokenfile, 'w') as token:
         token.write(credentials.to_json())
@@ -52,8 +55,7 @@ def index():
                 if "link" in req_data["now_playing"]["song"]:
                     link = req_data["now_playing"]["song"]["link"]
                 else:
-                    link = "discord.gg/coda"
-                print(text, link)
+                    link = placholder_link
                 send_message(text, link)
     return '{"success":"true"}'
 
@@ -65,23 +67,22 @@ def send_message(text, link):
     if len(liveChatId["items"]) == 0:
         return
     liveChatId = liveChatId["items"][0]["snippet"]["liveChatId"]
-    print(liveChatId)
-
+    now_playing_text = "Now Playing: " + text + " - " + link
+    print(now_playing_text)
     ytsend = youtube.liveChatMessages().insert(
         part="snippet",
         body={
           "snippet": {
             "type": "textMessageEvent",
-            "liveChatId": "{lcid}",
+            "liveChatId": liveChatId,
             "textMessageDetails": {
-              "messageText": "Now Playing: {now_playing} - {link}"
+              "messageText": now_playing_text
             }
-          }.format(lcid=liveChatId, now_playing=text, link=link)
+          }
         }
     )
 
     response = ytsend.execute()
-    print(response)
 
 
 if __name__ == "__main__":
