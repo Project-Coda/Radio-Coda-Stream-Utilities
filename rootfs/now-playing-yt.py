@@ -13,6 +13,7 @@ import googleapiclient.errors
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from flask import Flask, request
+
 app = Flask(__name__)
 scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -26,9 +27,9 @@ placholder_link = os.environ["PLACEHOLDER_LINK"]
 # Get credentials and create an API client
 
 credentials = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
+# The file token.json stores the user's access and refresh tokens, and is
+# created automatically when the authorization flow completes for the first
+# time.
 if os.path.exists(tokenfile):
     credentials = Credentials.from_authorized_user_file(tokenfile, scopes)
 # If there are no (valid) credentials available, let the user log in.
@@ -37,15 +38,18 @@ if not credentials or not credentials.valid:
         credentials.refresh(Request())
     else:
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-            client_secrets_file, scopes)
+            client_secrets_file, scopes
+        )
         credentials = flow.run_local_server(port=5410)
     # Save the credentials for the next run
-    with open(tokenfile, 'w') as token:
+    with open(tokenfile, "w") as token:
         token.write(credentials.to_json())
 youtube = googleapiclient.discovery.build(
-    api_service_name, api_version, credentials=credentials)
+    api_service_name, api_version, credentials=credentials
+)
 
-@app.route('/', methods=['POST','GET'])
+
+@app.route("/", methods=["POST", "GET"])
 def index():
     req_data = request.get_json()
     if "now_playing" in req_data:
@@ -59,11 +63,16 @@ def index():
                 send_message(text, link)
     return '{"success":"true"}'
 
+
 def send_message(text, link):
-    liveChatId = youtube.liveBroadcasts().list(
-        part="snippet",
-        broadcastStatus="active",
-    ).execute()
+    liveChatId = (
+        youtube.liveBroadcasts()
+        .list(
+            part="snippet",
+            broadcastStatus="active",
+        )
+        .execute()
+    )
     if len(liveChatId["items"]) == 0:
         return
     liveChatId = liveChatId["items"][0]["snippet"]["liveChatId"]
@@ -72,18 +81,16 @@ def send_message(text, link):
     ytsend = youtube.liveChatMessages().insert(
         part="snippet",
         body={
-          "snippet": {
-            "type": "textMessageEvent",
-            "liveChatId": liveChatId,
-            "textMessageDetails": {
-              "messageText": now_playing_text
+            "snippet": {
+                "type": "textMessageEvent",
+                "liveChatId": liveChatId,
+                "textMessageDetails": {"messageText": now_playing_text},
             }
-          }
-        }
+        },
     )
 
     response = ytsend.execute()
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host="0.0.0.0", port=5001)
