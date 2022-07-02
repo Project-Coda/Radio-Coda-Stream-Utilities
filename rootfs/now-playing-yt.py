@@ -58,10 +58,10 @@ def index():
                 text = req_data["now_playing"]["song"]["text"]
                 if "link" in req_data["now_playing"]["song"]["custom_fields"]:
                     link = req_data["now_playing"]["song"]["custom_fields"]["link"]
-                    if link == "None":
+                    if link == None:
                         link = placeholder_link
                 else:
-                    link = placholder_link
+                    link = placeholder_link
                 send_message(text, link)
     return '{"success":"true"}'
 
