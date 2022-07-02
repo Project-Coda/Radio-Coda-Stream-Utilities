@@ -4,6 +4,8 @@ services:
     build: .
     ports:
       - "5000:5000"
+      - "5001:5001"
+      - "5410:5410" # required for authnentication
     volumes:
       - ./data:/data
     env_file:
