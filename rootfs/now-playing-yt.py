@@ -21,7 +21,7 @@ api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = os.environ["CLIENT_SECRETS_FILE"]
 tokenfile = os.environ["TOKEN_FILE"]
-placholder_link = os.environ["PLACEHOLDER_LINK"]
+placeholder_link = os.environ["PLACEHOLDER_LINK"]
 
 
 # Get credentials and create an API client
