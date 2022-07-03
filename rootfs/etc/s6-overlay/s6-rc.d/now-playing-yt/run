@@ -1,2 +1,0 @@
-#!/command/with-contenv sh
-exec /usr/bin/python3 /now-playing-yt.py
