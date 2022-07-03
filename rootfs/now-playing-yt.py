@@ -6,6 +6,7 @@
 # The following code was adapted from the YouTube API v3 documentation
 
 import os
+from turtle import update
 
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -22,6 +23,7 @@ api_version = "v3"
 client_secrets_file = os.environ["CLIENT_SECRETS_FILE"]
 tokenfile = os.environ["TOKEN_FILE"]
 placeholder_link = os.environ["PLACEHOLDER_LINK"]
+FNAME = os.environ["NP_SOURCE"]
 
 
 # Get credentials and create an API client
@@ -62,9 +64,13 @@ def index():
                         link = placeholder_link
                 else:
                     link = placeholder_link
+                update_now_playing(text)
                 send_message(text, link)
     return '{"success":"true"}'
 
+def update_now_playing(text):
+    with open(FNAME, "w") as f:
+        f.write(text)
 
 def send_message(text, link):
     liveChatId = (
