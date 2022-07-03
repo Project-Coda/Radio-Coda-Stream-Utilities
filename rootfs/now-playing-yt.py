@@ -6,8 +6,6 @@
 # The following code was adapted from the YouTube API v3 documentation
 
 import os
-from turtle import update
-
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
