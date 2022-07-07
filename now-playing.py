@@ -6,6 +6,7 @@
 # The following code was adapted from the YouTube API v3 documentation
 
 import os
+import random
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -19,9 +20,12 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = os.environ["CLIENT_SECRETS_FILE"]
-tokenfile = os.environ["TOKEN_FILE"]
-placeholder_link = os.environ["PLACEHOLDER_LINK"]
+token_file = os.environ["TOKEN_FILE"]
+random_text = os.environ["RANDOM_TEXT"]
 FNAME = os.environ["NP_SOURCE"]
+
+# Initialize counter for number of messages sent
+message_count = 0
 
 
 # Get credentials and create an API client
@@ -30,8 +34,8 @@ credentials = None
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-if os.path.exists(tokenfile):
-    credentials = Credentials.from_authorized_user_file(tokenfile, scopes)
+if os.path.exists(token_file):
+    credentials = Credentials.from_authorized_user_file(token_file, scopes)
 # If there are no (valid) credentials available, let the user log in.
 if not credentials or not credentials.valid:
     if credentials and credentials.expired and credentials.refresh_token:
@@ -42,7 +46,7 @@ if not credentials or not credentials.valid:
         )
         credentials = flow.run_local_server(port=5410)
     # Save the credentials for the next run
-    with open(tokenfile, "w") as token:
+    with open(token_file, "w") as token:
         token.write(credentials.to_json())
 youtube = googleapiclient.discovery.build(
     api_service_name, api_version, credentials=credentials
@@ -58,19 +62,35 @@ def index():
                 text = req_data["now_playing"]["song"]["text"]
                 if "link" in req_data["now_playing"]["song"]["custom_fields"]:
                     link = req_data["now_playing"]["song"]["custom_fields"]["link"]
-                    if link == None:
-                        link = placeholder_link
-                else:
-                    link = placeholder_link
                 update_now_playing(text)
                 send_message(text, link)
+                if message_count > 2:
+                    send_message(random_message())
+                    message_count = 0
+                else:
+                    message_count += 1
+
     return '{"success":"true"}'
+def random_message():
+    with open(random_text, "r") as f:
+        text = f.read()
+        message = text.split("\n")
+        message = random.choice(message)
+    return message
 
 def update_now_playing(text):
     with open(FNAME, "w") as f:
         f.write(text)
 
-def send_message(text, link):
+def create_now_playing_text(text, link):
+    if link == None:
+        now_playing_text = "Now Playing: " + text
+    else:
+        now_playing_text = "Now Playing: " + text + " - " + link
+    print(now_playing_text)
+    return now_playing_text
+
+def send_message(message):
     liveChatId = (
         youtube.liveBroadcasts()
         .list(
@@ -82,15 +102,15 @@ def send_message(text, link):
     if len(liveChatId["items"]) == 0:
         return
     liveChatId = liveChatId["items"][0]["snippet"]["liveChatId"]
-    now_playing_text = "Now Playing: " + text + " - " + link
-    print(now_playing_text)
+
+    print(message)
     ytsend = youtube.liveChatMessages().insert(
         part="snippet",
         body={
             "snippet": {
                 "type": "textMessageEvent",
                 "liveChatId": liveChatId,
-                "textMessageDetails": {"messageText": now_playing_text},
+                "textMessageDetails": {"messageText": message},
             }
         },
     )
