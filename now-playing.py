@@ -4,6 +4,10 @@
 # See instructions for running these code samples locally:
 # https://developers.google.com/explorer-help/code-samples#python
 # The following code was adapted from the YouTube API v3 documentation
+# by Matheson Steplock
+'''
+    This code manages the now playing text and YouTube Live chatbot for the Radio Coda Stream
+'''
 
 import os
 import random
@@ -55,6 +59,9 @@ youtube = googleapiclient.discovery.build(
 
 @app.route("/", methods=["POST", "GET"])
 def index():
+    """
+    Main function which handles the request from the webhook sent by AzuraCast
+    """
     req_data = request.get_json()
     if "now_playing" in req_data:
         if "song" in req_data["now_playing"]:
@@ -74,20 +81,32 @@ def index():
 
 
 def random_message():
+    """
+    Returns a random message from the list of messages in
+    the random_text file defined in the environment variable
+    """
     with open(random_text, "r") as f:
         text = f.read()
         message = text.split("\n")
         message = random.choice(message)
+        f.close()
     return message
 
 
 def update_now_playing(text):
+    """
+    Updates the now playing text in the source file which is read by ffmpeg
+    """
     with open(FNAME, "w") as f:
         f.write(text)
+    return f.close()
 
 
 def create_now_playing_text(text, link):
-    if link == None:
+    """
+    Creates the now playing text to be sent to the chat
+    """
+    if link is None:
         now_playing_text = "Now Playing: " + text
     else:
         now_playing_text = "Now Playing: " + text + " - " + link
@@ -96,6 +115,9 @@ def create_now_playing_text(text, link):
 
 
 def send_message(message):
+    """
+    Sends a message to the YouTube Live Chat
+    """
     liveChatId = (
         youtube.liveBroadcasts()
         .list(
