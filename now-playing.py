@@ -71,6 +71,8 @@ def index():
                     message_count += 1
 
     return '{"success":"true"}'
+
+
 def random_message():
     with open(random_text, "r") as f:
         text = f.read()
@@ -78,9 +80,11 @@ def random_message():
         message = random.choice(message)
     return message
 
+
 def update_now_playing(text):
     with open(FNAME, "w") as f:
         f.write(text)
+
 
 def create_now_playing_text(text, link):
     if link == None:
@@ -89,6 +93,7 @@ def create_now_playing_text(text, link):
         now_playing_text = "Now Playing: " + text + " - " + link
     print(now_playing_text)
     return now_playing_text
+
 
 def send_message(message):
     liveChatId = (
@@ -115,7 +120,7 @@ def send_message(message):
         },
     )
 
-    response = ytsend.execute()
+    return ytsend.execute()
 
 
 if __name__ == "__main__":
