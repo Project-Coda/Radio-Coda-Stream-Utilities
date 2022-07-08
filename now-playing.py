@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Sample Python code for youtube.liveChatMessages.insert
-# See instructions for running these code samples locally:
-# https://developers.google.com/explorer-help/code-samples#python
-# The following code was adapted from the YouTube API v3 documentation
+
+'''
+    This code manages the now playing text and YouTube Live chatbot for the Radio Coda Stream
+    Author: Matheson Steplock
+    Adapted from: https://developers.google.com/explorer-help/code-samples#python
+'''
 
 import os
+import random
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -19,10 +22,12 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = os.environ["CLIENT_SECRETS_FILE"]
-tokenfile = os.environ["TOKEN_FILE"]
-placeholder_link = os.environ["PLACEHOLDER_LINK"]
+token_file = os.environ["TOKEN_FILE"]
+random_text = os.environ["RANDOM_TEXT_FILE"]
 FNAME = os.environ["NP_SOURCE"]
 
+# Initialize counter for number of messages sent
+message_count = 0
 
 # Get credentials and create an API client
 
@@ -30,8 +35,8 @@ credentials = None
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-if os.path.exists(tokenfile):
-    credentials = Credentials.from_authorized_user_file(tokenfile, scopes)
+if os.path.exists(token_file):
+    credentials = Credentials.from_authorized_user_file(token_file, scopes)
 # If there are no (valid) credentials available, let the user log in.
 if not credentials or not credentials.valid:
     if credentials and credentials.expired and credentials.refresh_token:
@@ -42,7 +47,7 @@ if not credentials or not credentials.valid:
         )
         credentials = flow.run_local_server(port=5410)
     # Save the credentials for the next run
-    with open(tokenfile, "w") as token:
+    with open(token_file, "w", encoding="utf-8") as token:
         token.write(credentials.to_json())
 youtube = googleapiclient.discovery.build(
     api_service_name, api_version, credentials=credentials
@@ -51,6 +56,9 @@ youtube = googleapiclient.discovery.build(
 
 @app.route("/", methods=["POST", "GET"])
 def index():
+    """
+    Main function which handles the request from the webhook sent by AzuraCast
+    """
     req_data = request.get_json()
     if "now_playing" in req_data:
         if "song" in req_data["now_playing"]:
@@ -58,19 +66,56 @@ def index():
                 text = req_data["now_playing"]["song"]["text"]
                 if "link" in req_data["now_playing"]["song"]["custom_fields"]:
                     link = req_data["now_playing"]["song"]["custom_fields"]["link"]
-                    if link == None:
-                        link = placeholder_link
-                else:
-                    link = placeholder_link
                 update_now_playing(text)
-                send_message(text, link)
+                send_message(create_now_playing_text(text, link))
+                global message_count
+                if message_count > 2:
+                    send_message(random_message())
+                    message_count = 0
+                else:
+                    message_count += 1
+
     return '{"success":"true"}'
 
-def update_now_playing(text):
-    with open(FNAME, "w") as f:
-        f.write(text)
 
-def send_message(text, link):
+def random_message():
+    """
+    Returns a random message from the list of messages in
+    the random_text file defined in the environment variable
+    """
+    with open(random_text, "r", encoding="utf-8") as f:
+        text = f.read()
+        message = text.split("\n")
+        message = random.choice(message)
+        f.close()
+    return message
+
+
+def update_now_playing(text):
+    """
+    Updates the now playing text in the source file which is read by ffmpeg
+    """
+    with open(FNAME, "w", encoding="utf-8") as f:
+        f.write(text)
+    return f.close()
+
+
+def create_now_playing_text(text, link):
+    """
+    Creates the now playing text to be sent to the chat
+    """
+    if link is None:
+        now_playing_text = "Now Playing: " + text
+    else:
+        now_playing_text = "Now Playing: " + text + " - " + link
+    print(now_playing_text)
+    return now_playing_text
+
+
+def send_message(message):
+    """
+    Sends a message to the YouTube Live Chat
+    """
     liveChatId = (
         youtube.liveBroadcasts()
         .list(
@@ -82,20 +127,20 @@ def send_message(text, link):
     if len(liveChatId["items"]) == 0:
         return
     liveChatId = liveChatId["items"][0]["snippet"]["liveChatId"]
-    now_playing_text = "Now Playing: " + text + " - " + link
-    print(now_playing_text)
+
+    print(message)
     ytsend = youtube.liveChatMessages().insert(
         part="snippet",
         body={
             "snippet": {
                 "type": "textMessageEvent",
                 "liveChatId": liveChatId,
-                "textMessageDetails": {"messageText": now_playing_text},
+                "textMessageDetails": {"messageText": message},
             }
         },
     )
 
-    response = ytsend.execute()
+    return ytsend.execute()
 
 
 if __name__ == "__main__":
