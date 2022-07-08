@@ -23,7 +23,7 @@ api_service_name = "youtube"
 api_version = "v3"
 client_secrets_file = os.environ["CLIENT_SECRETS_FILE"]
 token_file = os.environ["TOKEN_FILE"]
-random_text = os.environ["RANDOM_TEXT"]
+random_text = os.environ["RANDOM_TEXT_FILE"]
 FNAME = os.environ["NP_SOURCE"]
 
 # Initialize counter for number of messages sent
@@ -67,7 +67,8 @@ def index():
                 if "link" in req_data["now_playing"]["song"]["custom_fields"]:
                     link = req_data["now_playing"]["song"]["custom_fields"]["link"]
                 update_now_playing(text)
-                send_message(text, link)
+                send_message(create_now_playing_text(text, link))
+                global message_count
                 if message_count > 2:
                     send_message(random_message())
                     message_count = 0
