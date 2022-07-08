@@ -95,7 +95,8 @@ disable=raw-checker-failed,
         invalid-name,
         no-member,
         inconsistent-return-statements,
-        redefined-outer-name
+        redefined-outer-name,
+        global-statement
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
