@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Sample Python code for youtube.liveChatMessages.insert
-# See instructions for running these code samples locally:
-# https://developers.google.com/explorer-help/code-samples#python
-# The following code was adapted from the YouTube API v3 documentation
-# by Matheson Steplock
+
 '''
     This code manages the now playing text and YouTube Live chatbot for the Radio Coda Stream
+    Author: Matheson Steplock
+    Adapted from: https://developers.google.com/explorer-help/code-samples#python
 '''
 
 import os
@@ -31,7 +29,6 @@ FNAME = os.environ["NP_SOURCE"]
 # Initialize counter for number of messages sent
 message_count = 0
 
-
 # Get credentials and create an API client
 
 credentials = None
@@ -50,7 +47,7 @@ if not credentials or not credentials.valid:
         )
         credentials = flow.run_local_server(port=5410)
     # Save the credentials for the next run
-    with open(token_file, "w") as token:
+    with open(token_file, "w", encoding="utf-8") as token:
         token.write(credentials.to_json())
 youtube = googleapiclient.discovery.build(
     api_service_name, api_version, credentials=credentials
@@ -85,7 +82,7 @@ def random_message():
     Returns a random message from the list of messages in
     the random_text file defined in the environment variable
     """
-    with open(random_text, "r") as f:
+    with open(random_text, "r", encoding="utf-8") as f:
         text = f.read()
         message = text.split("\n")
         message = random.choice(message)
@@ -97,7 +94,7 @@ def update_now_playing(text):
     """
     Updates the now playing text in the source file which is read by ffmpeg
     """
-    with open(FNAME, "w") as f:
+    with open(FNAME, "w", encoding="utf-8") as f:
         f.write(text)
     return f.close()
 
