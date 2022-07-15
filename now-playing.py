@@ -82,7 +82,7 @@ def index():
                 now_playing_text = create_now_playing_text(text, link)
                 send_message(now_playing_text)
                 global message_count
-                print("Message count:" + message_count)
+                print("Message count:" + str(message_count))
                 if message_count > 2:
                     send_message(random_message())
                     message_count = 0
