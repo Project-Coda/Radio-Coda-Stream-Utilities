@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 
-'''
+"""
     This code manages the now playing text and YouTube Live chatbot for the Radio Coda Stream
     Author: Matheson Steplock
     Adapted from: https://developers.google.com/explorer-help/code-samples#python
-'''
+"""
 
 import os
 import random
@@ -35,6 +35,18 @@ credentials = None
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
+def refresh_credentials():
+    """
+    Refreshes the credentials
+    """
+    global credentials
+    if credentials is None:
+        credentials = Credentials.from_authorized_user_file(token_file)
+    else:
+        credentials.refresh(Request())
+    return credentials
+
+
 if os.path.exists(token_file):
     credentials = Credentials.from_authorized_user_file(token_file, scopes)
 # If there are no (valid) credentials available, let the user log in.
@@ -67,15 +79,18 @@ def index():
                 if "link" in req_data["now_playing"]["song"]["custom_fields"]:
                     link = req_data["now_playing"]["song"]["custom_fields"]["link"]
                 update_now_playing(text)
-                send_message(create_now_playing_text(text, link))
+                now_playing_text = create_now_playing_text(text, link)
+                send_message(now_playing_text)
                 global message_count
+                print("Message count:" + message_count)
                 if message_count > 2:
                     send_message(random_message())
                     message_count = 0
+                    refresh_credentials()
                 else:
                     message_count += 1
 
-    return '{"success":"true"}'
+    return 'OK Updated ' + str(now_playing_text)
 
 
 def random_message():
