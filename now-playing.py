@@ -90,7 +90,7 @@ def index():
                 else:
                     message_count += 1
 
-    return 'OK Updated Now Playing - ' + str()
+    return 'OK Updated ' + str(now_playing_text)
 
 
 def random_message():
