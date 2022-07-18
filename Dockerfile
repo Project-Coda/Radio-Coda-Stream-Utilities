@@ -1,4 +1,4 @@
-FROM alpine:3.16.0
+FROM alpine:3.16.1
 COPY now-playing.py /now-playing.py
 COPY requirements.txt /requirements.txt
 RUN apk add --no-cache python3 py3-pip
