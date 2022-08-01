@@ -35,17 +35,6 @@ credentials = None
 # The file token.json stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-def refresh_credentials():
-    """
-    Refreshes the credentials
-    """
-    global credentials
-    if credentials is None:
-        credentials = Credentials.from_authorized_user_file(token_file)
-    else:
-        credentials.refresh(Request())
-    return credentials
-
 
 if os.path.exists(token_file):
     credentials = Credentials.from_authorized_user_file(token_file, scopes)
@@ -86,11 +75,10 @@ def index():
                 if message_count > 2:
                     send_message(random_message())
                     message_count = 0
-                    refresh_credentials()
                 else:
                     message_count += 1
 
-    return 'OK Updated ' + str(now_playing_text)
+    return "OK Updated " + str(now_playing_text)
 
 
 def random_message():
